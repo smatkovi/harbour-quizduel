@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=QuizDuel
+Icon=/usr/share/icons/hicolor/80x80/apps/harbour-quizduel.png
+Exec=/opt/harbour-quizduel/bin/harbour-quizduel
+Terminal=false
+Categories=Game;
+X-Osso-Type=application/x-executable

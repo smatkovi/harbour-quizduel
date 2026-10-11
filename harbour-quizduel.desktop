@@ -1,0 +1,18 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=harbour-quizduel
+Exec=harbour-quizduel
+Name=QuizDuel
+
+[X-Sailjail]
+# Ohne diesen Abschnitt läuft die App in einem Standard-Sandkasten ohne Netz und
+# rendert leer (weiße Fläche). Internet erlaubt inet/inet6 (magbackend über HTTPS).
+# Secrets erlaubt den D-Bus-Zugriff auf sailfish-secretsd (Zugangsdaten im Geräteschloss,
+# wie Storeman) — ohne diese Permission ist SecretManager nicht initialisiert und der
+# „merken"-Schalter bliebe aus. Org/App-Name MÜSSEN zu QSettings("harbour-quizduel",
+# "harbour-quizduel") passen, sonst findet die App ihren eigenen Einstellungsort im
+# Sandkasten nicht (Sailjail-Einstellungsfalle) und vergisst die deviceId.
+Permissions=Internet;Secrets
+OrganizationName=harbour-quizduel
+ApplicationName=harbour-quizduel

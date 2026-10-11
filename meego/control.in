@@ -1,0 +1,15 @@
+Package: harbour-quizduel
+Version: @VERSION@
+Architecture: armel
+Maintainer: Sebastian Matkovich <sebastian.matkovich@gmail.com>
+Depends: libqtcore4, libqtgui4, libqt4-network, libqt4-declarative, qt-components
+Section: user/games
+Priority: optional
+Description: QuizDuel client (independent re-implementation)
+ Login and registration client for the MAG QuizDuel backend, MeeGo Harmattan
+ edition (Qt 4.7 with com.nokia.meego). HTTPS and the davinci protocol run in a
+ static rustls helper, because Harmattan's OpenSSL 0.9.8 cannot reach the server.
+ The classic duel follows once the game protocol is rebuilt.
+Maemo-Display-Name: QuizDuel
+XB-Maemo-Icon-26:
+@ICON@

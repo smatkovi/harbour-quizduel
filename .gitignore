@@ -1,0 +1,6 @@
+build/
+meego/fetch/target/
+*.rpm
+*.deb
+*.o
+*.d
