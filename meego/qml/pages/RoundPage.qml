@@ -28,14 +28,21 @@ Page {
 
     property variant questions: (category && category.questions) ? category.questions : []
     property variant curQ: (page.qIdx < questions.length) ? questions[page.qIdx] : 0
-    property variant curImg: (curQ && curQ.image) ? curQ.image : 0
-    property string curImgRaw: curImg ? ("" + (curImg.url_xhdpi || curImg.url_hdpi || curImg.url_mdpi || curImg.url_ldpi || "")) : ""
-    // Bild-URLs kommen schema-relativ (//host/…) -> https: voranstellen (sonst lädt nichts).
-    property string curImgUrl: curImgRaw.indexOf("//") === 0 ? ("https:" + curImgRaw) : curImgRaw
 
+    // URL des Bildes der AKTUELLEN Frage. DIREKT in startQuestion gesetzt, NICHT per Binding:
+    // onQIdxChanged läuft synchron, bevor ein curImg-Binding neu ausgewertet wird — sonst
+    // holte die Folgefrage noch das Bild der VORIGEN (eins lud, das nächste nicht).
+    property string pendingImgUrl: ""
     property string localImg: ""       // file://… sobald der Holer das Bild geladen hat
     property bool imgDone: false
-    property bool imageReady: curImgUrl.length === 0 || imgDone
+    property bool imageReady: pendingImgUrl.length === 0 || imgDone
+
+    // Normalisierte Bild-URL einer Frage (xhdpi bevorzugt; schema-relativ -> https:).
+    function imgUrlFor(q) {
+        var img = (q && q.image) ? q.image : null
+        var raw = img ? ("" + (img.url_xhdpi || img.url_hdpi || img.url_mdpi || img.url_ldpi || "")) : ""
+        return (raw.indexOf("//") === 0) ? ("https:" + raw) : raw
+    }
 
     function myPid() { return (room && room.myParticipantId) ? room.myParticipantId : page.participantId }
 
@@ -74,8 +81,10 @@ Page {
         page.timeLeft = page.timerSeconds
         page.localImg = ""
         page.imgDone = false
-        if (page.qIdx < questions.length) page.curOptions = optionsFor(questions[page.qIdx])
-        if (page.curImgUrl.length > 0) net.fetchImage(page.curImgUrl)   // Timer wartet auf imageReady
+        var q = (page.qIdx < questions.length) ? questions[page.qIdx] : null
+        if (q) page.curOptions = optionsFor(q)
+        page.pendingImgUrl = q ? imgUrlFor(q) : ""   // DIREKT aus der aktuellen Frage
+        if (page.pendingImgUrl.length > 0) net.fetchImage(page.pendingImgUrl)   // Timer wartet auf imageReady
     }
     Component.onCompleted: if (questions.length > 0) startQuestion()
     onQIdxChanged: startQuestion()
@@ -83,7 +92,7 @@ Page {
     Connections {
         target: net
         onImageFetched: {
-            if (url === page.curImgUrl) {
+            if (url === page.pendingImgUrl) {
                 page.localImg = path.length ? ("file://" + path) : ""
                 page.imgDone = true
             }
@@ -172,8 +181,6 @@ Page {
             Image {
                 visible: !page.busy && page.localImg.length > 0
                 source: page.localImg
-                cache: false          // Datei kann je Frage neu geschrieben werden -> nicht cachen
-                asynchronous: true
                 fillMode: Image.PreserveAspectFit
                 width: parent.width
                 sourceSize.width: parent.width
