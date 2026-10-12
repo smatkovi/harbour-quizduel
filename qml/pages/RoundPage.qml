@@ -29,7 +29,10 @@ Page {
     property var questions: (category && category.questions) ? category.questions : []
     property var curQ: (page.qIdx < questions.length) ? questions[page.qIdx] : null
     property var curImg: (curQ && curQ.image) ? curQ.image : null
-    property string curImgUrl: curImg ? ("" + (curImg.url_xhdpi || curImg.url_hdpi || curImg.url_mdpi || curImg.url_ldpi || "")) : ""
+    property string curImgRaw: curImg ? ("" + (curImg.url_xhdpi || curImg.url_hdpi || curImg.url_mdpi || curImg.url_ldpi || "")) : ""
+    // Bild-URLs kommen schema-relativ (//host/…) -> https: voranstellen, sonst löst Qt sie
+    // gegen die file://-Basis auf und lädt nichts.
+    property string curImgUrl: curImgRaw.indexOf("//") === 0 ? ("https:" + curImgRaw) : curImgRaw
     // Bildfragen: der Countdown darf erst laufen, wenn das Bild geladen ist (oder keins da ist,
     // oder es endgültig scheiterte) — sonst tickt die Zeit, während das Bild noch kommt.
     property bool imageReady: page.curImgUrl.length === 0

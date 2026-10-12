@@ -29,7 +29,9 @@ Page {
     property variant questions: (category && category.questions) ? category.questions : []
     property variant curQ: (page.qIdx < questions.length) ? questions[page.qIdx] : 0
     property variant curImg: (curQ && curQ.image) ? curQ.image : 0
-    property string curImgUrl: curImg ? ("" + (curImg.url_xhdpi || curImg.url_hdpi || curImg.url_mdpi || curImg.url_ldpi || "")) : ""
+    property string curImgRaw: curImg ? ("" + (curImg.url_xhdpi || curImg.url_hdpi || curImg.url_mdpi || curImg.url_ldpi || "")) : ""
+    // Bild-URLs kommen schema-relativ (//host/…) -> https: voranstellen (sonst lädt nichts).
+    property string curImgUrl: curImgRaw.indexOf("//") === 0 ? ("https:" + curImgRaw) : curImgRaw
 
     property string localImg: ""       // file://… sobald der Holer das Bild geladen hat
     property bool imgDone: false
@@ -170,6 +172,8 @@ Page {
             Image {
                 visible: !page.busy && page.localImg.length > 0
                 source: page.localImg
+                cache: false          // Datei kann je Frage neu geschrieben werden -> nicht cachen
+                asynchronous: true
                 fillMode: Image.PreserveAspectFit
                 width: parent.width
                 sourceSize.width: parent.width

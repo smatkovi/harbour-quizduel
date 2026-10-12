@@ -1,6 +1,6 @@
 Name:       harbour-quizduel
 Summary:    QuizDuel-Client für Sailfish OS
-Version:    0.6.7
+Version:    0.6.8
 Release:    1
 License:    proprietary
 URL:        https://github.com/smatkovi/harbour-quizduel

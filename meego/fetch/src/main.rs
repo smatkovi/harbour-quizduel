@@ -446,10 +446,13 @@ fn img_ext(b: &[u8]) -> &'static str {
 // (outBasis + ".png"/".jpg"/…) und den TATSÄCHLICHEN Pfad zurückgeben. Harmattans Qt 4 /
 // OpenSSL 0.9.8 kann die CDN-https-Bilder NICHT selbst laden.
 fn fetch_file(url: &str, out_base: &str) -> i32 {
+    // Bild-URLs kommen SCHEMA-RELATIV (//d215czjpbbh1ts.cloudfront.net/…); ohne Schema
+    // kann reqwest nicht laden. https: voranstellen.
+    let url_norm = if url.starts_with("//") { format!("https:{}", url) } else { url.to_string() };
     let client = match reqwest::blocking::Client::builder().timeout(Duration::from_secs(40)).build() {
         Ok(c) => c, Err(e) => { emit(json!({"error": e.to_string()})); return 1; }
     };
-    match client.get(url).header("user-agent", UA).send() {
+    match client.get(&url_norm).header("user-agent", UA).send() {
         Ok(resp) => {
             let status = resp.status().as_u16();
             match resp.bytes() {

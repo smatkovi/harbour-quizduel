@@ -155,7 +155,7 @@ void NetBridge::onError(QProcess::ProcessError)
 void NetBridge::onFinished(int, QProcess::ExitStatus)
 {
     QProcess *p = qobject_cast<QProcess *>(sender());
-    if (!p) { dbg(QLatin1String("onFinished: sender NULL")); return; }
+    if (!p) return;
     const QString s = QString::fromUtf8(p->readAllStandardOutput()).trimmed();
     // Prozess freigeben, BEVOR wir Signale auslösen (die synchron neue Requests starten).
     if (p == m_proc) m_proc = 0;
@@ -416,8 +416,17 @@ void NetBridge::addFriend(qlonglong friendUserId)
 void NetBridge::fetchImage(const QString &url)
 {
     if (url.isEmpty()) { emit imageFetched(url, QString()); return; }
-    // Basispfad ohne Endung; der Holer hängt die erkannte Bildendung an und meldet sie.
-    const QString outBase = cacheDir() + QLatin1String("/img_") + QString::number(qHash(url), 16);
+    // EINDEUTIGER Dateiname aus dem letzten URL-Segment (das ist schon ein langer Hash).
+    // qHash (32 Bit) kollidiert sonst und QtQuick 1.1 cacht Bilder PRO URL -> bei gleichem
+    // Dateinamen würde das falsche (alte) Bild gezeigt.
+    QString seg = url.section(QLatin1Char('/'), -1);
+    QString safe;
+    for (int i = 0; i < seg.length(); ++i) {
+        const QChar c = seg.at(i);
+        if (c.isLetterOrNumber() || c == QLatin1Char('_') || c == QLatin1Char('-')) safe += c;
+    }
+    if (safe.isEmpty()) safe = QString::number(qHash(url), 16);
+    const QString outBase = cacheDir() + QLatin1String("/img_") + safe;
     QProcess *p = new QProcess(this);
     p->setProperty("url", url);
     connect(p, SIGNAL(finished(int, QProcess::ExitStatus)),
