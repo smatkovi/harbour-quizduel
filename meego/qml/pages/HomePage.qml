@@ -78,7 +78,15 @@ Page {
             Label { visible: page.note.length > 0; text: page.note; color: "#7eb3ff"; font.pixelSize: 20 }
 
             Label { text: S.t(net.locale, "activeGames"); font.pixelSize: 24; color: "#d0d0d0" }
-            Label { visible: !page.busy && page.activeItems.length === 0; text: S.t(net.locale, "noActiveGames"); color: "#808080"; font.pixelSize: 20 }
+            Label {
+                visible: !page.busy && page.activeItems.length === 0
+                width: parent.width; wrapMode: Text.Wrap
+                // Gar keine Spiele (aktiv UND beendet leer) -> es kann auch eine abgelaufene
+                // Sitzung sein; dann Hinweis aufs Neu-Anmelden. Sonst nur „keine aktiven".
+                text: page.finishedItems.length === 0 ? S.t(net.locale, "noGamesHint")
+                                                       : S.t(net.locale, "noActiveGames")
+                color: "#808080"; font.pixelSize: 20
+            }
 
             Repeater {
                 model: page.activeItems
